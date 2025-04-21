@@ -13,14 +13,14 @@ CREATE TABLE Musician(
 CREATE TABLE Records(
 	id SERIAL PRIMARY KEY,
 	name 	VARCHAR(200)	NOT NULL,
-	years	INTEGER(3)	NOT NULL 
+	years	INTEGER	NOT NULL 
 	);
 
 
 CREATE TABLE Music_track(
 	id SERIAL PRIMARY key,
 	name 		VARCHAR(200) NOT NULL,
-	length 		INTEGER(3)	 NOT NULL,
+	length 		INTEGER	 NOT NULL,
 	record_id 	INTEGER		 NOT NULL,
 	FOREIGN KEY (record_id) REFERENCES Records(id)
 	);
@@ -29,7 +29,7 @@ CREATE TABLE Music_track(
 CREATE TABLE Collection(
 	id SERIAL PRIMARY KEY,
 	name 	VARCHAR(200) NOT NULL,
-	years 	INTEGER(4) 	 NOT NULL
+	years 	INTEGER 	 NOT NULL
 	);
 
 CREATE TABLE C_Mt(
@@ -132,7 +132,14 @@ SELECT name_alias
 -- Название треков, которые содержат слово «мой» или «my»
 SELECT name 
   FROM music_track
- WHERE name LIKE '%мое%' OR name LIKE '%ma%';
+ WHERE name ILIKE 'Мир%'
+ 	OR name ILIKE '%Мир'
+ 	OR name ILIKE '%Мир%'
+ 	OR name ILIKE 'Мир'
+	OR name ILIKE 'Mio%'
+	OR name ILIKE '%Mio'
+	OR name ILIKE '%Mio%'
+	OR name ILIKE 'Mio';
 
 
 -- Задание №3 SELECT-запросы
@@ -156,34 +163,56 @@ SELECT r.name, avg(length)
  GROUP BY r.name;
 
 -- Все исполнители, которые не выпустили альбомы в 2020 году
-SELECT name_alias, years
+
+SELECT name_alias from musician AS m
+WHERE name_alias not in
+	(SELECT name_alias from musician AS m2
+	JOIN m_r AS mr 
+	ON m2.id = mr.records_id
+	JOIN records AS r 
+	ON mr.records_id = r.id
+	WHERE r.years = '2020');
+	
+
+-- мое ранее направленное решение
+SELECT distinct name_alias
   FROM records AS r 
   	   LEFT JOIN music_track AS mt 
   	   ON r.id = mt.id
-  	   
   	   LEFT JOIN m_r AS mr 
   	   ON r.id = mr.records_id
-  	   
   	   LEFT JOIN musician AS m
   	   ON mr.musician_id = m.id
  GROUP BY name_alias, years 
 HAVING years NOT BETWEEN '2020' AND '2020';
 
 -- Названия сборников, в которых присутствует конкретный исполнитель (выберите его сами)
+SELECT DISTINCT c.name 
+  FROM collection AS c 
+	   JOIN c_mt AS cm 
+	   ON c.id = cm.music_track_id 
+       JOIN music_track AS mt 
+       ON cm.music_track_id = mt.id
+       JOIN records AS r 
+       ON mt.id = r.id
+	   JOIN m_r AS mr 
+	   ON r.id = mr.musician_id 
+	   JOIN musician AS m 
+	   ON mr.musician_id = m.id
+ WHERE name_alias = 'Луи Армстронг';
+
+
+-- мое ранее напарвленное решение
 SELECT m2.name_alias AS na, c.name AS col_n  
   FROM musician AS m 
        RIGHT JOIN m_r AS mr  
        ON m.id = mr.records_id
-       
        LEFT JOIN musician AS m2 
        ON mr.musician_id = m2.id
-       
        LEFT JOIN music_track AS mt 
        ON mr.records_id = mt.id
-       
        LEFT JOIN c_mt AS cm 
        ON mt.id = cm.music_track_id
-       
        LEFT JOIN collection AS c 
        ON cm.collection_id = c.id 
  GROUP BY na, col_n
