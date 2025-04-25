@@ -129,17 +129,17 @@ SELECT name_alias
   FROM musician
  WHERE name_alias NOT LIKE '% %';
 
--- Название треков, которые содержат слово «мой» или «my»
-SELECT name 
+-- Название треков, которые содержат слово «мир» или «mio»
+SELECT distinct name 
   FROM music_track
- WHERE name ILIKE 'Мир%'
- 	OR name ILIKE '%Мир'
- 	OR name ILIKE '%Мир%'
- 	OR name ILIKE 'Мир'
-	OR name ILIKE 'Mio%'
-	OR name ILIKE '%Mio'
-	OR name ILIKE '%Mio%'
-	OR name ILIKE 'Mio';
+ WHERE name ILIKE 'мир%'
+ 	OR name ILIKE '%мир'
+ 	OR name ILIKE '%мир%'
+ 	OR name ILIKE 'мир'
+	OR name ILIKE 'mio%'
+	OR name ILIKE '%mio'
+	OR name ILIKE '%mio%'
+	OR name ILIKE 'mio';
 
 
 -- Задание №3 SELECT-запросы
@@ -164,56 +164,29 @@ SELECT r.name, avg(length)
 
 -- Все исполнители, которые не выпустили альбомы в 2020 году
 
-SELECT name_alias from musician AS m
+SELECT distinct name_alias from musician AS m
 WHERE name_alias not in
 	(SELECT name_alias from musician AS m2
 	JOIN m_r AS mr 
-	ON m2.id = mr.records_id
+	ON m2.id = mr.musician_id
 	JOIN records AS r 
 	ON mr.records_id = r.id
-	WHERE r.years = '2020');
+	WHERE r.years = 2020);
 	
-
--- мое ранее направленное решение
-SELECT distinct name_alias
-  FROM records AS r 
-  	   LEFT JOIN music_track AS mt 
-  	   ON r.id = mt.id
-  	   LEFT JOIN m_r AS mr 
-  	   ON r.id = mr.records_id
-  	   LEFT JOIN musician AS m
-  	   ON mr.musician_id = m.id
- GROUP BY name_alias, years 
-HAVING years NOT BETWEEN '2020' AND '2020';
 
 -- Названия сборников, в которых присутствует конкретный исполнитель (выберите его сами)
 SELECT DISTINCT c.name 
   FROM collection AS c 
 	   JOIN c_mt AS cm 
-	   ON c.id = cm.music_track_id 
+	   ON c.id = cm.collection_id 
        JOIN music_track AS mt 
        ON cm.music_track_id = mt.id
        JOIN records AS r 
-       ON mt.id = r.id
+       ON mt.record_id = r.id
 	   JOIN m_r AS mr 
-	   ON r.id = mr.musician_id 
+	   ON r.id = mr.records_id 
 	   JOIN musician AS m 
 	   ON mr.musician_id = m.id
  WHERE name_alias = 'Луи Армстронг';
 
 
--- мое ранее напарвленное решение
-SELECT m2.name_alias AS na, c.name AS col_n  
-  FROM musician AS m 
-       RIGHT JOIN m_r AS mr  
-       ON m.id = mr.records_id
-       LEFT JOIN musician AS m2 
-       ON mr.musician_id = m2.id
-       LEFT JOIN music_track AS mt 
-       ON mr.records_id = mt.id
-       LEFT JOIN c_mt AS cm 
-       ON mt.id = cm.music_track_id
-       LEFT JOIN collection AS c 
-       ON cm.collection_id = c.id 
- GROUP BY na, col_n
-HAVING m2.name_alias LIKE 'Луи Армстронг';
