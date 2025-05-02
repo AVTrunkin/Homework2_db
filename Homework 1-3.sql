@@ -132,13 +132,13 @@ SELECT name_alias
 -- Название треков, которые содержат слово «мир» или «mio»
 SELECT distinct name 
   FROM music_track
- WHERE name ILIKE 'мир%'
- 	OR name ILIKE '%мир'
- 	OR name ILIKE '%мир%'
+ WHERE name ILIKE 'мир %'
+ 	OR name ILIKE '% мир'
+ 	OR name ILIKE '% мир %'
  	OR name ILIKE 'мир'
-	OR name ILIKE 'mio%'
-	OR name ILIKE '%mio'
-	OR name ILIKE '%mio%'
+	OR name ILIKE 'mio %'
+	OR name ILIKE '% mio'
+	OR name ILIKE '% mio %'
 	OR name ILIKE 'mio';
 
 
@@ -151,15 +151,15 @@ SELECT COUNT(DISTINCT musician_id) musician_id, musical_genres_id
 -- Количество треков, вошедших в альбомы 2019–2020 годов
 SELECT COUNT(record_id) 
   FROM records AS r 
-       LEFT JOIN music_track AS mt 
-       ON r.id = mt.id
- WHERE years BETWEEN '2018' AND '2020';
+       JOIN music_track AS mt 
+       ON r.id = mt.record_id 
+ WHERE years BETWEEN '2019' AND '2020';
 
 -- Средняя продолжительность треков по каждому альбому
 SELECT r.name, avg(length) 
   FROM records AS r 
        LEFT JOIN music_track AS mt 
-       ON r.id = mt.id
+       ON r.id = mt.record_id
  GROUP BY r.name;
 
 -- Все исполнители, которые не выпустили альбомы в 2020 году
